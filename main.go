@@ -19,10 +19,13 @@ func init() {
 
 var TokenSecret []byte
 
+var port string
+
 func main() {
 	initializeDataStorage()
 
 	TokenSecret = []byte(os.Getenv("TOKEN_SECRET"))
+	port = os.Getenv("PORT")
 
 	router := gin.Default()
 	router.POST("/login", login)
@@ -32,7 +35,7 @@ func main() {
 	router.GET("/files/:id", getFile)
 	router.POST("/upload", uploadFile)
 
-	err := router.Run("localhost:8080")
+	err := router.Run(":" + port)
 	if err != nil {
 		log.Fatal("Failed to start router!")
 	}
