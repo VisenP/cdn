@@ -59,10 +59,6 @@ func getFile(ctx *gin.Context) {
 	ctx.File(targetPath)
 }
 
-type fileUploadResponse struct {
-	Id string `json:"id"`
-}
-
 func uploadFile(ctx *gin.Context) {
 	user := extractUser(ctx)
 	if user == nil {
