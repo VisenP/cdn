@@ -10,15 +10,18 @@ import (
 )
 
 type storedFile struct {
-	Name      string `json:"name"`
 	Id        string `json:"id"`
+	Name      string `json:"name"`
+	Public    bool   `json:"public"`
 	Owner     string `json:"owner"`
 	Encrypted bool   `json:"encrypted"`
 }
 
 type user struct {
+	Id       string `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
+	Admin    bool   `json:"admin"`
 }
 
 var fileData []storedFile
@@ -35,7 +38,7 @@ func save() {
 	if err != nil {
 		log.Fatal("Error saving file data: " + err.Error())
 	}
-	err = os.WriteFile("./files/fileData.json", userDataJson, 0644)
+	err = os.WriteFile("./files/userData.json", userDataJson, 0644)
 	if err != nil {
 		log.Fatal("Error saving user data: " + err.Error())
 	}
