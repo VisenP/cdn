@@ -30,8 +30,6 @@ var userData []user
 
 func save() {
 
-	log.Println("Saving data!")
-
 	fileDataJson, _ := json.Marshal(fileData)
 	userDataJson, _ := json.Marshal(userData)
 
@@ -44,7 +42,6 @@ func save() {
 		log.Fatal("Error saving user data: " + err.Error())
 	}
 
-	log.Println("Saved successfully!")
 }
 
 func createJsonIfNotExists(name string) {
