@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"time"
 )
 
 type storedFile struct {
@@ -22,6 +23,25 @@ type user struct {
 
 var fileData []storedFile
 var userData []user
+
+func save() {
+
+	log.Println("Saving data!")
+
+	fileDataJson, _ := json.Marshal(fileData)
+	userDataJson, _ := json.Marshal(userData)
+
+	err := os.WriteFile("./files/fileData.json", fileDataJson, 0644)
+	if err != nil {
+		log.Fatal("Error saving file data: " + err.Error())
+	}
+	err = os.WriteFile("./files/fileData.json", userDataJson, 0644)
+	if err != nil {
+		log.Fatal("Error saving user data: " + err.Error())
+	}
+
+	log.Println("Saved successfully!")
+}
 
 func createJsonIfNotExists(name string) {
 	_, err := os.Stat("./files/" + name)
@@ -76,4 +96,11 @@ func initializeDataStorage() {
 	}
 
 	log.Println("Data loaded successfully!")
+
+	go func() {
+		for true {
+			save()
+			time.Sleep(10 * time.Second)
+		}
+	}()
 }
