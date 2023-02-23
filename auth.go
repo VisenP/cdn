@@ -6,7 +6,6 @@ import (
 	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"log"
-	"net/http"
 	"strings"
 )
 
@@ -26,14 +25,13 @@ func generateJWT(userId string) string {
 	return tokenString
 }
 
-func validateUser(ctx *gin.Context) {
+func extractUser(ctx *gin.Context) *user {
 
 	authHeader := ctx.GetHeader("Authorization")
 	tokenString, foundPrefix := strings.CutPrefix(authHeader, "Bearer ")
 
 	if !foundPrefix {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		return nil
 	}
 
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
@@ -48,20 +46,18 @@ func validateUser(ctx *gin.Context) {
 	})
 
 	if err != nil {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		return nil
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 
 	if !(ok && token.Valid) {
-		ctx.AbortWithStatus(http.StatusUnauthorized)
-		return
+		return nil
 	}
 
-	ctx.Set("user_id", claims["user_id"].(string))
-
-	ctx.Next()
+	return findFirst(&userData, func(u user) bool {
+		return u.Id == claims["user_id"]
+	})
 }
 
 func hashPassword(password string) (string, error) {

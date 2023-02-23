@@ -12,6 +12,7 @@ import (
 type storedFile struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
+	Ext       string `json:"ext"`
 	Public    bool   `json:"public"`
 	Owner     string `json:"owner"`
 	Encrypted bool   `json:"encrypted"`
