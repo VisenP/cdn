@@ -29,6 +29,7 @@ func main() {
 	router.GET("/users", getUsers)
 
 	router.GET("/files", getAllFiles)
+	router.GET("/files/:id", getFile)
 	router.POST("/upload", uploadFile)
 
 	err := router.Run("localhost:8080")

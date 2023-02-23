@@ -25,6 +25,40 @@ func getAllFiles(ctx *gin.Context) {
 	}))
 }
 
+func getFile(ctx *gin.Context) {
+
+	fileId := ctx.Param("id")
+
+	fileInfo := findFirst(&fileData, func(f storedFile) bool {
+		return f.Id == fileId
+	})
+
+	if fileInfo == nil {
+		ctx.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+
+	if !fileInfo.Public {
+		user := extractUser(ctx)
+		if user == nil {
+			ctx.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		if !(*user).Admin && (*user).Id != fileInfo.Owner {
+			ctx.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+	}
+
+	targetPath := "./files/" + fileInfo.Id + fileInfo.Ext
+
+	ctx.Header("Content-Description", "File Transfer")
+	ctx.Header("Content-Transfer-Encoding", "binary")
+	ctx.Header("Content-Disposition", "attachment; filename="+fileInfo.Name)
+	ctx.Header("Content-Type", "application/octet-stream")
+	ctx.File(targetPath)
+}
+
 type fileUploadResponse struct {
 	Id string `json:"id"`
 }
