@@ -32,7 +32,8 @@ func main() {
 	router.GET("/users", getUsers)
 
 	router.GET("/files", getAllFiles)
-	router.GET("/files/:id", getFile)
+	router.GET("/files/:id", getFile(false))
+	router.GET("/view/:id", getFile(true))
 	router.POST("/upload", uploadFile)
 
 	err := router.Run(":" + port)
