@@ -54,7 +54,7 @@ func GetFile(display bool) func(ctx2 *gin.Context) {
 			}
 		}
 
-		targetPath := "./file/" + fileInfo.Id + fileInfo.Ext
+		targetPath := "./files/" + fileInfo.Id + fileInfo.Ext
 
 		if display {
 			ctx.Header("Content-Disposition", "inline")
@@ -97,7 +97,7 @@ func UploadFile(ctx *gin.Context) {
 
 	database.FileData = append(database.FileData, newFile)
 
-	err = ctx.SaveUploadedFile(file, "./file/"+id.String()+ext)
+	err = ctx.SaveUploadedFile(file, "./files/"+id.String()+ext)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return

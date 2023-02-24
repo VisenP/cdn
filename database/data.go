@@ -33,11 +33,11 @@ func save() {
 	fileDataJson, _ := json.Marshal(FileData)
 	userDataJson, _ := json.Marshal(UserData)
 
-	err := os.WriteFile("./file/FileData.json", fileDataJson, 0644)
+	err := os.WriteFile("./files/fileData.json", fileDataJson, 0644)
 	if err != nil {
 		log.Fatal("Error saving file data: " + err.Error())
 	}
-	err = os.WriteFile("./file/userData.json", userDataJson, 0644)
+	err = os.WriteFile("./files/userData.json", userDataJson, 0644)
 	if err != nil {
 		log.Fatal("Error saving user data: " + err.Error())
 	}
@@ -45,12 +45,12 @@ func save() {
 }
 
 func createJsonIfNotExists(name string) {
-	_, err := os.Stat("./file/" + name)
+	_, err := os.Stat("./files/" + name)
 	if err == nil {
 		return
 	} else if errors.Is(err, os.ErrNotExist) {
 		log.Println("Creating file: " + name)
-		err = os.WriteFile("./file/"+name, []byte("[]"), 0644)
+		err = os.WriteFile("./files/"+name, []byte("[]"), 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -61,7 +61,7 @@ func createJsonIfNotExists(name string) {
 
 func readFileData(name string) []byte {
 	log.Println("Reading file: " + name)
-	file, err := os.Open("./file/" + name)
+	file, err := os.Open("./files/" + name)
 	if err != nil {
 		log.Fatal("Unable to open file: " + name)
 	}
@@ -79,15 +79,15 @@ func readFileData(name string) []byte {
 }
 
 func InitializeDataStorage() {
-	err := os.MkdirAll("./file", os.ModePerm)
+	err := os.MkdirAll("./files", os.ModePerm)
 	if err != nil {
 		log.Fatal("Could not create directory!")
 	}
 
-	createJsonIfNotExists("FileData.json")
+	createJsonIfNotExists("fileData.json")
 	createJsonIfNotExists("userData.json")
 
-	err = json.Unmarshal(readFileData("FileData.json"), &FileData)
+	err = json.Unmarshal(readFileData("fileData.json"), &FileData)
 	if err != nil {
 		log.Fatal("Error reading file data!")
 	}
