@@ -1,6 +1,6 @@
-package main
+package utils
 
-func filter[T any](ss []T, test func(T) bool) []T {
+func Filter[T any](ss []T, test func(T) bool) []T {
 	ret := make([]T, 0)
 	for _, s := range ss {
 		if test(s) {
@@ -10,7 +10,7 @@ func filter[T any](ss []T, test func(T) bool) []T {
 	return ret
 }
 
-func findFirst[T any](ss *[]T, test func(T) bool) *T {
+func FindFirst[T any](ss *[]T, test func(T) bool) *T {
 	for _, s := range *ss {
 		if test(s) {
 			return &s

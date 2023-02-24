@@ -1,4 +1,4 @@
-package main
+package database
 
 import (
 	"encoding/json"
@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-type storedFile struct {
+type StoredFile struct {
 	Id        string `json:"id"`
 	Name      string `json:"name"`
 	Ext       string `json:"ext"`
@@ -18,26 +18,26 @@ type storedFile struct {
 	Encrypted bool   `json:"encrypted"`
 }
 
-type user struct {
+type User struct {
 	Id       string `json:"id"`
 	Username string `json:"username"`
 	Password string `json:"password"`
 	Admin    bool   `json:"admin"`
 }
 
-var fileData []storedFile
-var userData []user
+var FileData []StoredFile
+var UserData []User
 
 func save() {
 
-	fileDataJson, _ := json.Marshal(fileData)
-	userDataJson, _ := json.Marshal(userData)
+	fileDataJson, _ := json.Marshal(FileData)
+	userDataJson, _ := json.Marshal(UserData)
 
-	err := os.WriteFile("./files/fileData.json", fileDataJson, 0644)
+	err := os.WriteFile("./file/FileData.json", fileDataJson, 0644)
 	if err != nil {
 		log.Fatal("Error saving file data: " + err.Error())
 	}
-	err = os.WriteFile("./files/userData.json", userDataJson, 0644)
+	err = os.WriteFile("./file/userData.json", userDataJson, 0644)
 	if err != nil {
 		log.Fatal("Error saving user data: " + err.Error())
 	}
@@ -45,12 +45,12 @@ func save() {
 }
 
 func createJsonIfNotExists(name string) {
-	_, err := os.Stat("./files/" + name)
+	_, err := os.Stat("./file/" + name)
 	if err == nil {
 		return
 	} else if errors.Is(err, os.ErrNotExist) {
 		log.Println("Creating file: " + name)
-		err = os.WriteFile("./files/"+name, []byte("[]"), 0644)
+		err = os.WriteFile("./file/"+name, []byte("[]"), 0644)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -61,7 +61,7 @@ func createJsonIfNotExists(name string) {
 
 func readFileData(name string) []byte {
 	log.Println("Reading file: " + name)
-	file, err := os.Open("./files/" + name)
+	file, err := os.Open("./file/" + name)
 	if err != nil {
 		log.Fatal("Unable to open file: " + name)
 	}
@@ -78,20 +78,20 @@ func readFileData(name string) []byte {
 	return fileBytes
 }
 
-func initializeDataStorage() {
-	err := os.MkdirAll("./files", os.ModePerm)
+func InitializeDataStorage() {
+	err := os.MkdirAll("./file", os.ModePerm)
 	if err != nil {
 		log.Fatal("Could not create directory!")
 	}
 
-	createJsonIfNotExists("fileData.json")
+	createJsonIfNotExists("FileData.json")
 	createJsonIfNotExists("userData.json")
 
-	err = json.Unmarshal(readFileData("fileData.json"), &fileData)
+	err = json.Unmarshal(readFileData("FileData.json"), &FileData)
 	if err != nil {
 		log.Fatal("Error reading file data!")
 	}
-	err = json.Unmarshal(readFileData("userData.json"), &userData)
+	err = json.Unmarshal(readFileData("userData.json"), &UserData)
 	if err != nil {
 		log.Fatal("Error reading user data!")
 	}

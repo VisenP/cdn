@@ -1,42 +1,31 @@
 package main
 
 import (
+	"cdn/database"
+	"cdn/global"
+	"cdn/routes/file"
+	"cdn/routes/user"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 	"log"
-	"os"
 )
 
 func init() {
-	err := godotenv.Load(".env")
-
-	if err != nil {
-		log.Fatal("Could not load .env!")
-	}
-
-	log.Println("Env file loaded!")
+	global.InitGlobals()
 }
 
-var TokenSecret []byte
-
-var port string
-
 func main() {
-	initializeDataStorage()
-
-	TokenSecret = []byte(os.Getenv("TOKEN_SECRET"))
-	port = os.Getenv("PORT")
+	database.InitializeDataStorage()
 
 	router := gin.Default()
-	router.POST("/login", login)
-	router.GET("/users", getUsers)
+	router.POST("/login", user.Login)
+	router.GET("/user", user.GetUsers)
 
-	router.GET("/files", getAllFiles)
-	router.GET("/files/:id", getFile(false))
-	router.GET("/view/:id", getFile(true))
-	router.POST("/upload", uploadFile)
+	router.GET("/file", file.GetAllFiles)
+	router.GET("/file/:id", file.GetFile(false))
+	router.GET("/view/:id", file.GetFile(true))
+	router.POST("/upload", file.UploadFile)
 
-	err := router.Run(":" + port)
+	err := router.Run(":" + global.Port)
 	if err != nil {
 		log.Fatal("Failed to start router!")
 	}

@@ -1,17 +1,20 @@
-package main
+package file
 
 import (
+	"cdn/auth"
+	"cdn/database"
+	"cdn/utils"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"net/http"
 	"path/filepath"
 )
 
-func getAllFiles(ctx *gin.Context) {
+func GetAllFiles(ctx *gin.Context) {
 
-	user := extractUser(ctx)
+	user := auth.ExtractUser(ctx)
 
-	ctx.IndentedJSON(http.StatusOK, filter(fileData, func(file storedFile) bool {
+	ctx.IndentedJSON(http.StatusOK, utils.Filter(database.FileData, func(file database.StoredFile) bool {
 		if file.Public {
 			return true
 		}
@@ -25,12 +28,12 @@ func getAllFiles(ctx *gin.Context) {
 	}))
 }
 
-func getFile(display bool) func(ctx2 *gin.Context) {
+func GetFile(display bool) func(ctx2 *gin.Context) {
 
 	return func(ctx *gin.Context) {
 		fileId := ctx.Param("id")
 
-		fileInfo := findFirst(&fileData, func(f storedFile) bool {
+		fileInfo := utils.FindFirst(&database.FileData, func(f database.StoredFile) bool {
 			return f.Id == fileId
 		})
 
@@ -40,7 +43,7 @@ func getFile(display bool) func(ctx2 *gin.Context) {
 		}
 
 		if !fileInfo.Public {
-			user := extractUser(ctx)
+			user := auth.ExtractUser(ctx)
 			if user == nil {
 				ctx.AbortWithStatus(http.StatusNotFound)
 				return
@@ -51,7 +54,7 @@ func getFile(display bool) func(ctx2 *gin.Context) {
 			}
 		}
 
-		targetPath := "./files/" + fileInfo.Id + fileInfo.Ext
+		targetPath := "./file/" + fileInfo.Id + fileInfo.Ext
 
 		if display {
 			ctx.Header("Content-Disposition", "inline")
@@ -66,8 +69,8 @@ func getFile(display bool) func(ctx2 *gin.Context) {
 	}
 }
 
-func uploadFile(ctx *gin.Context) {
-	user := extractUser(ctx)
+func UploadFile(ctx *gin.Context) {
+	user := auth.ExtractUser(ctx)
 	if user == nil {
 		ctx.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -83,7 +86,7 @@ func uploadFile(ctx *gin.Context) {
 
 	ext := filepath.Ext(file.Filename)
 
-	newFile := storedFile{
+	newFile := database.StoredFile{
 		Id:        id.String(),
 		Ext:       ext,
 		Name:      fileName,
@@ -92,9 +95,9 @@ func uploadFile(ctx *gin.Context) {
 		Encrypted: false,
 	}
 
-	fileData = append(fileData, newFile)
+	database.FileData = append(database.FileData, newFile)
 
-	err = ctx.SaveUploadedFile(file, "./files/"+id.String()+ext)
+	err = ctx.SaveUploadedFile(file, "./file/"+id.String()+ext)
 	if err != nil {
 		ctx.AbortWithStatus(http.StatusInternalServerError)
 		return

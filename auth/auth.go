@@ -1,6 +1,9 @@
-package main
+package auth
 
 import (
+	"cdn/database"
+	"cdn/global"
+	"cdn/utils"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -9,13 +12,12 @@ import (
 	"strings"
 )
 
-func generateJWT(userId string) string {
+func GenerateJWT(userId string) string {
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
 	claims["user_id"] = userId
 
-	log.Println(TokenSecret)
-	tokenString, err := token.SignedString(TokenSecret)
+	tokenString, err := token.SignedString(global.TokenSecret)
 
 	if err != nil {
 		log.Println(err)
@@ -25,7 +27,7 @@ func generateJWT(userId string) string {
 	return tokenString
 }
 
-func extractUser(ctx *gin.Context) *user {
+func ExtractUser(ctx *gin.Context) *database.User {
 
 	authHeader := ctx.GetHeader("Authorization")
 	tokenString, foundPrefix := strings.CutPrefix(authHeader, "Bearer ")
@@ -42,7 +44,7 @@ func extractUser(ctx *gin.Context) *user {
 			return nil, errors.New("sigining method error")
 		}
 
-		return TokenSecret, nil
+		return global.TokenSecret, nil
 	})
 
 	if err != nil {
@@ -55,17 +57,17 @@ func extractUser(ctx *gin.Context) *user {
 		return nil
 	}
 
-	return findFirst(&userData, func(u user) bool {
+	return utils.FindFirst(&database.UserData, func(u database.User) bool {
 		return u.Id == claims["user_id"]
 	})
 }
 
-func hashPassword(password string) (string, error) {
+func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }
 
-func checkPasswordHash(password, hash string) bool {
+func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }

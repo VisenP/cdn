@@ -1,6 +1,9 @@
-package main
+package user
 
 import (
+	"cdn/auth"
+	"cdn/database"
+	"cdn/utils"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -14,7 +17,7 @@ type userLogin struct {
 	Password string `json:"password"`
 }
 
-func login(c *gin.Context) {
+func Login(c *gin.Context) {
 
 	var userLogin userLogin
 
@@ -25,7 +28,7 @@ func login(c *gin.Context) {
 		return
 	}
 
-	user := findFirst(&userData, func(u user) bool {
+	user := utils.FindFirst(&database.UserData, func(u database.User) bool {
 		return u.Username == userLogin.Username
 	})
 
@@ -34,18 +37,18 @@ func login(c *gin.Context) {
 		return
 	}
 
-	if !checkPasswordHash(userLogin.Password, (*user).Password) {
+	if !auth.CheckPasswordHash(userLogin.Password, (*user).Password) {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
-	c.IndentedJSON(http.StatusOK, generateJWT((*user).Id))
+	c.IndentedJSON(http.StatusOK, auth.GenerateJWT((*user).Id))
 }
 
-func getUsers(c *gin.Context) {
+func GetUsers(c *gin.Context) {
 	users := make([]returnUser, 0)
 
-	for _, user := range userData {
+	for _, user := range database.UserData {
 		users = append(users, returnUser{Username: user.Username})
 	}
 
