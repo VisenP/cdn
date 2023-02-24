@@ -18,6 +18,7 @@ func main() {
 
 	router := gin.Default()
 	router.POST("/login", user.Login)
+	router.POST("/register", user.Register)
 	router.GET("/user", user.GetUsers)
 
 	router.GET("/file", file.GetAllFiles)

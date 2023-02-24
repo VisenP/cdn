@@ -5,6 +5,7 @@ import (
 	"cdn/database"
 	"cdn/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 	"net/http"
 )
 
@@ -43,6 +44,41 @@ func Login(c *gin.Context) {
 	}
 
 	c.IndentedJSON(http.StatusOK, auth.GenerateJWT((*user).Id))
+}
+
+type userRegister struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+	Admin    bool   `json:"admin"`
+}
+
+func Register(c *gin.Context) {
+	var newUser userRegister
+
+	user := auth.ExtractUser(c)
+
+	if user == nil || !(*user).Admin {
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	err := c.BindJSON(&newUser)
+
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	hashedPassword, err := auth.HashPassword(newUser.Password)
+
+	if err != nil {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+
+	database.UserData = append(database.UserData, database.User{Id: uuid.New().String(), Username: newUser.Username, Password: hashedPassword, Admin: newUser.Admin})
+
+	c.IndentedJSON(http.StatusOK, newUser)
 }
 
 func GetUsers(c *gin.Context) {
